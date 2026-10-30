@@ -97,3 +97,35 @@ class BidResult(BaseModel):
     new_close: datetime
     reason: str
     rfq: RFQOut
+
+
+class RankingEntry(BaseModel):
+    rank: int
+    label: str  # L1, L2, L3 ...
+    supplier: str
+    bid: BidOut
+    bid_count: int
+
+
+class ActivityOut(BaseModel):
+    id: int
+    kind: str
+    message: str
+    details: dict
+    created_at: datetime
+
+
+class RFQDetail(BaseModel):
+    rfq: RFQOut
+    ranking: list[RankingEntry]
+    bids: list[BidOut]  # every bid, cheapest first
+    activity: list[ActivityOut]  # newest first
+    server_time: datetime  # lets the browser's countdown use the server's clock
+
+
+class RFQPage(BaseModel):
+    items: list[RFQOut]
+    total: int
+    limit: int
+    offset: int
+    server_time: datetime

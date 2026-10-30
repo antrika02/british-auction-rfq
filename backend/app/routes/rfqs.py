@@ -1,10 +1,19 @@
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 
 from ..clock import get_clock
 from ..db import get_db
-from ..schemas import BidCreate, BidResult, RFQCreate, RFQOut
-from ..services import create_rfq, get_rfq, place_bid, to_out
+from ..queries import get_detail, list_rfqs
+from ..schemas import (
+    AuctionStatus,
+    BidCreate,
+    BidResult,
+    RFQCreate,
+    RFQDetail,
+    RFQOut,
+    RFQPage,
+)
+from ..services import create_rfq, place_bid, to_out
 
 router = APIRouter(prefix="/api/rfqs", tags=["RFQs"])
 
@@ -16,9 +25,29 @@ def create(data: RFQCreate, db: Session = Depends(get_db), clock=Depends(get_clo
     return to_out(rfq, now)
 
 
-@router.get("/{rfq_id}", response_model=RFQOut)
-def read(rfq_id: int, db: Session = Depends(get_db), clock=Depends(get_clock)):
-    return to_out(get_rfq(db, rfq_id), clock())
+@router.get("", response_model=RFQPage)
+def listing(
+    status: AuctionStatus | None = None,
+    q: str | None = Query(default=None, max_length=100),
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    db: Session = Depends(get_db),
+    clock=Depends(get_clock),
+):
+    now = clock()
+    rows, total = list_rfqs(db, now, status, q, limit, offset)
+    return RFQPage(
+        items=[to_out(r, now) for r in rows],
+        total=total,
+        limit=limit,
+        offset=offset,
+        server_time=now,
+    )
+
+
+@router.get("/{rfq_id}", response_model=RFQDetail)
+def details(rfq_id: int, db: Session = Depends(get_db), clock=Depends(get_clock)):
+    return get_detail(db, rfq_id, clock())
 
 
 @router.post("/{rfq_id}/bids", response_model=BidResult, status_code=201)
