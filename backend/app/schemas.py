@@ -53,3 +53,47 @@ class RFQOut(BaseModel):
     extension_count: int
     lowest_bid: Decimal | None
     created_at: datetime
+
+
+class BidCreate(BaseModel):
+    carrier_name: str = Field(min_length=2, max_length=120)
+    freight_charges: Decimal = Field(ge=0, max_digits=12, decimal_places=2)
+    origin_charges: Decimal = Field(ge=0, max_digits=12, decimal_places=2)
+    destination_charges: Decimal = Field(ge=0, max_digits=12, decimal_places=2)
+    transit_days: int = Field(ge=1, le=365)
+    quote_validity_days: int = Field(ge=1, le=365)
+    # Optional: lets a client safely retry the same request without a double bid
+    idempotency_key: str | None = Field(default=None, max_length=64)
+
+    @property
+    def total(self) -> Decimal:
+        return self.freight_charges + self.origin_charges + self.destination_charges
+
+    @model_validator(mode="after")
+    def check_total(self):
+        if self.total <= 0:
+            raise ValueError("The total quote must be greater than zero")
+        return self
+
+
+class BidOut(BaseModel):
+    id: int
+    supplier: str
+    freight_charges: Decimal
+    origin_charges: Decimal
+    destination_charges: Decimal
+    total: Decimal
+    transit_days: int
+    quote_validity_days: int
+    created_at: datetime
+
+
+class BidResult(BaseModel):
+    bid: BidOut
+    duplicate: bool
+    rank: int  # 1 means L1
+    extended: bool
+    previous_close: datetime
+    new_close: datetime
+    reason: str
+    rfq: RFQOut
