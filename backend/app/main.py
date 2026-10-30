@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session
 
 from .config import settings
 from .db import get_db
+from .errors import install_error_handlers
+from .routes import rfqs
 
 app = FastAPI(title="British Auction RFQ API", version="0.1.0")
 
@@ -14,6 +16,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+install_error_handlers(app)
+app.include_router(rfqs.router)
 
 
 @app.get("/health")
