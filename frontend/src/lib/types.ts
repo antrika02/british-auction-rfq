@@ -64,3 +64,14 @@ export interface RFQDetail {
   activity: Activity[];
   server_time: string;
 }
+
+export interface BidResult {
+  bid: Bid;
+  duplicate: boolean;
+  rank: number;
+  extended: boolean;
+  previous_close: string;
+  new_close: string;
+  reason: string;
+  rfq: RFQ;
+}

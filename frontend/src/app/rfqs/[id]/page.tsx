@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import ActivityLog from "@/components/ActivityLog";
 import AuctionHeader from "@/components/AuctionHeader";
+import BidForm from "@/components/BidForm";
 import BidsTable from "@/components/BidsTable";
 import RankingBoard from "@/components/RankingBoard";
 import { useNow } from "@/lib/useNow";
@@ -51,9 +52,7 @@ export default function AuctionPage() {
           <div className="grid gap-5 lg:grid-cols-3">
             <div className="space-y-5 lg:col-span-2">
               <RankingBoard ranking={detail.ranking} />
-              <div className="rounded-lg border border-dashed border-slate-300 p-4 text-center text-sm text-slate-500">
-                The bid form goes here (Step 16).
-              </div>
+              <BidForm rfq={detail.rfq} ranking={detail.ranking} onPlaced={refresh} />
               <BidsTable bids={detail.bids} />
             </div>
             <ActivityLog activity={detail.activity} />

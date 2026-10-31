@@ -1,4 +1,4 @@
-import type { AuctionStatus, RFQ, RFQDetail, RFQPage, TriggerType } from "./types";
+import type { AuctionStatus, BidResult, RFQ, RFQDetail, RFQPage, TriggerType } from "./types";
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8001";
 export const WS_URL = process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:8001";
@@ -67,6 +67,7 @@ export interface BidInput {
   destination_charges: number;
   transit_days: number;
   quote_validity_days: number;
+  idempotency_key?: string;
 }
 export const placeBid = (rfqId: number | string, data: BidInput) =>
-  request(`/api/rfqs/${rfqId}/bids`, { method: "POST", body: JSON.stringify(data) });
+  request<BidResult>(`/api/rfqs/${rfqId}/bids`, { method: "POST", body: JSON.stringify(data) });
