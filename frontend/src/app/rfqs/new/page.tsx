@@ -119,7 +119,7 @@ export default function NewRfqPage() {
 
     setSubmitting(true);
     try {
-      await createRfq({
+      const created = await createRfq({
         name: f.name.trim(),
         bid_start: new Date(f.bidStart).toISOString(),
         bid_close: new Date(f.bidClose).toISOString(),
@@ -129,7 +129,7 @@ export default function NewRfqPage() {
         trigger_window_minutes: Number(f.x),
         extension_minutes: Number(f.y),
       });
-      router.push("/"); // Step 15 will send you to the new auction's page instead
+      router.push(`/rfqs/${created.id}`);
     } catch (e) {
       if (e instanceof ApiError) {
         // Show backend messages under the matching field when possible
