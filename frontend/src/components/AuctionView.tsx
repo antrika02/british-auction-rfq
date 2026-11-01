@@ -8,6 +8,7 @@ import AuctionHeader from "@/components/AuctionHeader";
 import BidForm from "@/components/BidForm";
 import BidsTable from "@/components/BidsTable";
 import RankingBoard from "@/components/RankingBoard";
+import TimelineBar from "@/components/TimelineBar";
 import { useNow } from "@/lib/useNow";
 import { useRfqDetail } from "@/lib/useRfqDetail";
 
@@ -49,11 +50,12 @@ export default function AuctionView() {
       {detail && (
         <div className="space-y-5">
           <AuctionHeader rfq={detail.rfq} serverNow={serverNow} />
+          <TimelineBar rfq={detail.rfq} serverNow={serverNow} />
           <div className="grid gap-5 lg:grid-cols-3">
             <div className="space-y-5 lg:col-span-2">
               <RankingBoard ranking={detail.ranking} />
               <BidForm rfq={detail.rfq} ranking={detail.ranking} onPlaced={refresh} />
-              <BidsTable bids={detail.bids} />
+              <BidsTable rfqId={detail.rfq.id} bids={detail.bids} />
             </div>
             <ActivityLog activity={detail.activity} />
           </div>

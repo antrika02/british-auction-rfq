@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from .config import settings
 from .db import get_db
 from .errors import install_error_handlers
-from .routes import rfqs, ws
+from .routes import export, rfqs, ws
 
 app = FastAPI(title="British Auction RFQ API", version="0.1.0")
 
@@ -18,6 +18,7 @@ app.add_middleware(
 )
 install_error_handlers(app)
 app.include_router(rfqs.router)
+app.include_router(export.router)
 app.include_router(ws.router)
 
 

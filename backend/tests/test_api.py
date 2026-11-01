@@ -282,3 +282,22 @@ def test_bids_at_the_same_moment_are_handled_safely(client, clock):
     totals = [Decimal(r["bid"]["total"]) for r in d["ranking"]]
     assert totals == sorted(totals)
     assert Decimal(d["rfq"]["lowest_bid"]) == Decimal(930)
+
+
+# ---------- CSV export ----------
+def test_csv_export(client, clock):
+    rfq = make_rfq(client, clock)
+    bid(client, rfq["id"], "Alpha", 1000)
+    bid(client, rfq["id"], "=SUM(1+1)", 900)  # a carrier name that looks like a formula
+
+    r = client.get(f"/api/rfqs/{rfq['id']}/bids.csv")
+    assert r.status_code == 200
+    assert r.headers["content-type"].startswith("text/csv")
+    assert "attachment" in r.headers["content-disposition"]
+    lines = r.text.strip().splitlines()
+    assert len(lines) == 3  # header + 2 bids
+    assert lines[1].split(",")[1] == "'=SUM(1+1)"  # lowest first, formula neutralised
+
+
+def test_csv_export_of_unknown_auction_is_404(client):
+    assert client.get("/api/rfqs/999/bids.csv").status_code == 404
